@@ -8,5 +8,5 @@ const pool=new Pool({
     port:process.env.DB_PORT,
     database:process.env.DATABASE
 })
-pool.query("SELECT NOW()")
+
 module.exports=pool
