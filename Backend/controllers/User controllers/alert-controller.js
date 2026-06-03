@@ -30,13 +30,7 @@ const getAlertsNearby=asyncHandler(async(req,res)=>{
     const data = await fetch_alerts_from_sachet_ndma()
     const filtered = await filter_data_from_fetch(data)
     const nearby_and_distance_with_count = fetch_nearby_alerts(filtered, latitude, longitude, radiusKm)
-    const count=parseInt(nearby_and_distance_with_count.count)
-    const nearby_and_distance=nearby_and_distance_with_count.alerts
-    res.json({
-        count:count,
-        alerts:nearby_and_distance,
-    }
-    )
+    res.json(nearby_and_distance_with_count)
 })
 //@desc submit reports to db from frontend
 //@route /api/alert/report

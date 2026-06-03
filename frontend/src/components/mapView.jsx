@@ -19,7 +19,6 @@ function MapView(props) {
             />
             {
                 alerts && alerts.map((alert, index) => {
-                    console.log(alert.latitude, alert.longitude);
                     return (
                         <Marker
                             key={index}

@@ -77,21 +77,20 @@ const fetch_nearby_alerts=(filtered, latitude, longitude, radiusKm)=>{
         if (Number.isNaN(itemLat) || Number.isNaN(itemLon)) return false
         return  distanceKm(latitude, longitude, itemLat, itemLon)<= radiusKm
     })
-    const nearby_and_distance=[];
+    const alerts=[];
+    const distances=[];
     for(let i=0;i<nearby.length;i++){
         let itemLat = parseFloat(nearby[i].latitude)
         let itemLon = parseFloat(nearby[i].longitude)
         const distance=distanceKm(latitude, longitude, itemLat, itemLon)
-        const obj={
-            alert: nearby[i],
-            distance: distance
-        }
-        nearby_and_distance.push(obj)
+        alerts.push(nearby[i]);
+        distances.push(distance);
     }
     const nearby_and_distance_with_count={
         
         count:nearby.length,
-        alerts: nearby_and_distance
+        alerts: alerts,
+        distances:distances
     }
     
     return nearby_and_distance_with_count

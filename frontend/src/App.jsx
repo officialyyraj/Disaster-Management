@@ -2,60 +2,92 @@ import { useState,useEffect } from 'react'
 import './App.css'
 import AlertCard from './components/alertCards.jsx'
 import MapView from "./components/MapView"
+import useGeoLocation from './hooks/useGeoLocation.js'
 function App() {
+  const location=useGeoLocation();
   const [alerts, setalerts] = useState([])
+  const [radius, setRadius] = useState(null)
+
   useEffect(()=>{
     const fetch_alerts=async ()=>{
       const response= await fetch("http://localhost:5000/api/alert")
       if(!response.ok)throw new Error("Server temporarily offline")
       const data= await response.json()
+
       setalerts(data)
     };
     fetch_alerts();
-
   },[]);
-  return (
-  <div className="app">
 
-  <h1 className="heading">
-    Disaster Alerts
-  </h1>
+  useEffect(()=>{
+    if (radius === null || !location.loaded || location.error) return;
+    const showNearby = async () => {
+      const response = await fetch(
+        `http://localhost:5000/api/alert/nearby?lat=${location.coordinates.lat}&lon=${location.coordinates.lng}&rad=${radius}`
+      );
+      if (!response.ok) throw new Error("Server temporarily offline");
+      const data = await response.json();
+      setalerts(data.alerts);
+    };
 
-  <MapView alert={alerts}/>
+    showNearby();
+  }, [radius, location.loaded, location.error]);
 
+  const handleNearbyClick = () => {
+    const input = prompt("Enter radius in kilometers:");
+    if (input === null) return;
 
-  <div className="alert-grid">
-
-    {
-      alerts.map((alert, index) => (
-
-        <div className="card" key={index}>
-          <div className="area_desc">
-            {alert.area_description}
-          </div>
-
-          <div className="type">
-            {alert.disaster_type}
-          </div>
-
-          <div className="severity">
-            {alert.severity}
-          </div>
-
-          <div className="message">
-            {alert.warning_message}
-          </div>
-          
-          
-
-        </div>
-
-      ))
+    const parsed = Number(input);
+    if (Number.isNaN(parsed) || parsed <= 0) {
+      console.error("Please enter a valid radius");
+      return;
     }
 
-  </div>
+    setRadius(parsed);
+  }
 
-</div>
+  return (
+  <div className="app">
+    <div className="header">
+      <h1 className="heading">🚨 Disaster Alerts</h1>
+      <p className="subtitle">Stay informed about emergencies in your area</p>
+    </div>
+   
+    <div className="map-container">
+      <MapView alert={alerts}/>
+    </div>
+
+    <div className='control-panel'>
+      <button className='nearby-btn' onClick={handleNearbyClick}>📍 Show Nearby Alerts</button>
+    </div>
+
+    <div className="alerts-section">
+      <h2 className="section-title">Active Alerts ({alerts.length})</h2>
+      <div className="alert-grid">
+        {
+          alerts.length > 0 ? (
+            alerts.map((alert, index) => (
+              <div className="card" key={index}>
+                <div className="card-header">
+                  <span className="disaster-type-badge">{alert.disaster_type}</span>
+                  <span className="severity-badge" data-severity={alert.severity.toLowerCase()}>
+                    {alert.severity}
+                  </span>
+                </div>
+                <div className="card-body">
+                  <h3 className="area_desc">{alert.area_description}</h3>
+                  <p className="message">{alert.warning_message}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="no-alerts">✅ No active alerts in your area</div>
+          )
+        }
+      </div>
+    </div>
+
+  </div>
   )
 }
 

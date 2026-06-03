@@ -1,3 +1,4 @@
+
 function AlertCard({ type, severity, message }) {
 
   return (
