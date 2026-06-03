@@ -6,12 +6,12 @@ function MapView(props) {
         <MapContainer
             center={[20.5937, 78.9629]}
             zoom={5}
-            style={{height: "1000px",
-                    width: "50%",
-                    marginLeft: "auto",
-                    marginRight: "auto",
-                    display: "block" 
-                }}
+            style={{
+                height: "500px",
+                width: "100%",
+                borderRadius: "12px",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.1)"
+            }}
         >
             <TileLayer
                 attribution='&copy; OpenStreetMap contributors'

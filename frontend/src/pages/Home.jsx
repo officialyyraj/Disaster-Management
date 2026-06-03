@@ -1,9 +1,11 @@
-import { useState,useEffect } from 'react'
-import './App.css'
-import AlertCard from './components/alertCards.jsx'
-import MapView from "./components/MapView"
-import useGeoLocation from './hooks/useGeoLocation.js'
-function App() {
+import React from 'react'
+import {useState,useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import './Home.css'
+import AlertCard from '../components/alertCards.jsx'
+import MapView from "../components/mapView.jsx"
+import useGeoLocation from '../hooks/useGeoLocation.js'
+export const Home = () => {
   const location=useGeoLocation();
   const [alerts, setalerts] = useState([])
   const [radius, setRadius] = useState(null)
@@ -49,7 +51,7 @@ function App() {
   return (
   <div className="app">
     <div className="header">
-      <h1 className="heading">🚨 Disaster Alerts</h1>
+      <h1 className="heading"> Disaster Alerts</h1>
       <p className="subtitle">Stay informed about emergencies in your area</p>
     </div>
    
@@ -58,7 +60,8 @@ function App() {
     </div>
 
     <div className='control-panel'>
-      <button className='nearby-btn' onClick={handleNearbyClick}>📍 Show Nearby Alerts</button>
+      <button className='nearby-btn' onClick={handleNearbyClick}> Show Nearby Alerts</button>
+      <Link to="/reports" className='report-btn'>Submit Report</Link>
     </div>
 
     <div className="alerts-section">
@@ -81,7 +84,7 @@ function App() {
               </div>
             ))
           ) : (
-            <div className="no-alerts">✅ No active alerts in your area</div>
+            <div className="no-alerts">No active alerts in your area</div>
           )
         }
       </div>
@@ -90,6 +93,3 @@ function App() {
   </div>
   )
 }
-
-export default App
-
