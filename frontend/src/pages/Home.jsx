@@ -5,6 +5,9 @@ import './Home.css'
 import AlertCard from '../components/alertCards.jsx'
 import MapView from "../components/mapView.jsx"
 import useGeoLocation from '../hooks/useGeoLocation.js'
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
 export const Home = () => {
   const location=useGeoLocation();
   const [alerts, setalerts] = useState([])
@@ -12,7 +15,7 @@ export const Home = () => {
 
   useEffect(()=>{
     const fetch_alerts=async ()=>{
-      const response= await fetch("http://localhost:5000/api/alert")
+      const response= await fetch(`${BACKEND_URL}/api/alert`)
       if(!response.ok)throw new Error("Server temporarily offline")
       const data= await response.json()
 
@@ -25,7 +28,7 @@ export const Home = () => {
     if (radius === null || !location.loaded || location.error) return;
     const showNearby = async () => {
       const response = await fetch(
-        `http://localhost:5000/api/alert/nearby?lat=${location.coordinates.lat}&lon=${location.coordinates.lng}&rad=${radius}`
+        `${BACKEND_URL}/api/alert/nearby?lat=${location.coordinates.lat}&lon=${location.coordinates.lng}&rad=${radius}`
       );
       if (!response.ok) throw new Error("Server temporarily offline");
       const data = await response.json();
