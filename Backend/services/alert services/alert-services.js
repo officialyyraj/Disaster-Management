@@ -1,5 +1,9 @@
 const dotenv=require('dotenv')
 dotenv.config();
+
+let cached_data=null;
+let lastfetchtime=0;
+
 const fetch_alerts_from_sachet_ndma=async()=>{
     const ndmaUrl = process.env.NDMA_URL;
     if (!ndmaUrl) {
@@ -11,15 +15,25 @@ const fetch_alerts_from_sachet_ndma=async()=>{
     } catch (e) {
         throw new Error(`Invalid NDMA_URL: ${ndmaUrl}`);
     }
-    const fing = await fetch(url.href)
-    if(!fing || (fing && !fing.ok)){
-        const status = fing && fing.status ? fing.status : 'no-response'
-        throw new Error(`Unable to fetch alerts from sachet (status: ${status})`)
+    let data
+    if(cached_data && (Date.now()-lastfetchtime)<120000){
+        data = cached_data
     }
-    const data = await fing.json()
-    if(!data){
-        throw new Error("Problem while parsing fetched alerts from ndma")
+    else{
+        let Fetch = (await fetch(url.href))
+
+         if(!Fetch || (Fetch && !Fetch.ok)){
+            const status = Fetch && Fetch.status ? Fetch.status : 'no-response'
+            throw new Error(`Unable to fetch alerts from sachet (status: ${status})`)
+        }
+        data=await Fetch.json();
+        if(!data){
+            throw new Error("Problem with parsing the fetched alerts");
+        }
+        lastfetchtime=Date.now();
+        cached_data=data
     }
+    
     return data
 }
 const filter_data_from_fetch=async(data)=>{
