@@ -76,7 +76,7 @@ export const Home = () => {
               <div className="card" key={index}>
                 <div className="card-header">
                   <span className="disaster-type-badge">{alert.disaster_type}</span>
-                  <span className="severity-badge" data-severity={alert.severity.toLowerCase()}>
+                  <span className="severity-badge" data-severity={alert.severity}>
                     {alert.severity}
                   </span>
                 </div>
