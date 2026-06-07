@@ -6,7 +6,7 @@ import AlertCard from '../components/alertCards.jsx'
 import MapView from "../components/mapView.jsx"
 import useGeoLocation from '../hooks/useGeoLocation.js'
 
-const BACKEND_URL =  import.meta.env.VITE_BACKEND_URL ||'http://localhost:5000';
+const BACKEND_URL =  'http://localhost:5000';
 export const Home = () => {
   const location=useGeoLocation();
   const [alerts, setalerts] = useState([])
