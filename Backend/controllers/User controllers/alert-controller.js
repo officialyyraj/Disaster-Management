@@ -33,7 +33,7 @@ const getAlertsNearby=asyncHandler(async(req,res)=>{
     res.json(nearby_and_distance_with_count)
 })
 //@desc submit reports to db from frontend
-//@route /api/alert/report
+//@route /api /report
 //@access public
 const submitReport=asyncHandler(async(req,res)=>{
     const data=req.body
@@ -41,6 +41,13 @@ const submitReport=asyncHandler(async(req,res)=>{
     const description=data.description
     const lat=data.latitude
     const lon=data.longitude
-    res.send(type+" "+description+" "+lat+" "+lon)
+
+    const insertText = 'INSERT INTO "reports" (type,description,latitude,longitude,status,created_at) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *'
+    const values = [type, description, lat, lon, 'User reported', new Date()]
+
+    const result = await pool.query(insertText, values)
+    const inserted = result.rows && result.rows[0]
+
+    res.status(201).json({ report: inserted })
 })
 module.exports={getAlerts,getAlertsNearby,submitReport}

@@ -6,13 +6,11 @@ import AlertCard from '../components/alertCards.jsx'
 import MapView from "../components/mapView.jsx"
 import useGeoLocation from '../hooks/useGeoLocation.js'
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-
+const BACKEND_URL =  import.meta.env.VITE_BACKEND_URL ||'http://localhost:5000';
 export const Home = () => {
   const location=useGeoLocation();
   const [alerts, setalerts] = useState([])
   const [radius, setRadius] = useState(null)
-
   useEffect(()=>{
     const fetch_alerts=async ()=>{
       const response= await fetch(`${BACKEND_URL}/api/alert`)
@@ -39,16 +37,7 @@ export const Home = () => {
   }, [radius, location.loaded, location.error]);
 
   const handleNearbyClick = () => {
-    const input = prompt("Enter radius in kilometers:");
-    if (input === null) return;
-
-    const parsed = Number(input);
-    if (Number.isNaN(parsed) || parsed <= 0) {
-      console.error("Please enter a valid radius");
-      return;
-    }
-
-    setRadius(parsed);
+    setRadius(300);
   }
 
   return (
@@ -57,11 +46,9 @@ export const Home = () => {
       <h1 className="heading"> Disaster Alerts</h1>
       <p className="subtitle">Stay informed about emergencies in your area</p>
     </div>
-   
     <div className="map-container">
       <MapView alert={alerts}/>
     </div>
-
     <div className='control-panel'>
       <button className='nearby-btn' onClick={handleNearbyClick}> Show Nearby Alerts</button>
       <Link to="/reports" className='report-btn'>Submit Report</Link>
