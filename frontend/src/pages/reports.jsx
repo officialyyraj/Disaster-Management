@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import useGeoLocation from "../hooks/useGeoLocation";
 import "./reports.css";
+const BACKEND_URL ='http://localhost:5000';  
 export const Reports = () => {
+  const location = useGeoLocation();
   const [form, setForm] = useState({
     type: "",
     description: "",
@@ -18,10 +21,36 @@ export const Reports = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleGetCurrentLocation = (e) => {
     e.preventDefault();
+    if (!location.loaded) {
+      alert("Waiting for location permission or browser geolocation.");
+      return;
+    }
+    if (location.error) {
+      alert(`Geolocation error: ${location.error.message}`);
+      return;
+    }
+    setForm((prev) => ({
+      ...prev,
+      latitude: location.coordinates.lat.toString(),
+      longitude: location.coordinates.lng.toString(),
+    }));
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const response=await fetch(`${BACKEND_URL}/api/report`,{
+      method: "POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify(form)
+    })
+    if(!response.ok){
+    throw new Error("Failed to submit report");
+    }
     setSubmitted(true);
-    console.log("Report submitted", form);
   };
 
   return (
@@ -92,6 +121,9 @@ export const Reports = () => {
 
           <button type="submit" className="reports-submit">
             Submit report
+          </button>
+          <button type="button" className="reports-submit" onClick={handleGetCurrentLocation}>
+            Get My Current Location
           </button>
         </form>
 

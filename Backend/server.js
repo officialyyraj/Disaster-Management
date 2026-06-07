@@ -7,11 +7,13 @@ const PORT=process.env.PORT||5000;
 const app = express()
 const errorHandler=require("./Middleware/errorMiddleware.js");
 const alert_route=require('./routes/Api routes/alert-routes.js')
+const report_route=require('./routes/Api routes/report-routes.js')
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
-app.use(errorHandler)
 app.use(cors())
 app.use('/api/alert',alert_route)
+app.use('/api/report',report_route)
+app.use(errorHandler)
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`)
 })
