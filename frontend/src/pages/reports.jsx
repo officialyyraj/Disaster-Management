@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import useGeoLocation from "../hooks/useGeoLocation";
 import "./reports.css";
-const BACKEND_URL =  import.meta.env.VITE_BACKEND_URL ||'http://localhost:5000';
+const BACKEND_URL =  'http://localhost:5000';//import.meta.env.VITE_BACKEND_URL ||
 export const Reports = () => {
   const location = useGeoLocation();
   const [form, setForm] = useState({
@@ -12,14 +12,24 @@ export const Reports = () => {
     longitude: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const { name, value } = e.target;
+  let newValue = value;
+  
+  if (name === 'latitude' || name === 'longitude') {
+    newValue = value === '' ? '' : parseFloat(value);
+  } else if (name === 'type' || name === 'description') {
+    newValue = value.toLowerCase();
+  }
+  
+  setForm((prev) => ({
+    ...prev,
+    [name]: newValue,
+  }));
+  setError("");
+};
 
   const handleGetCurrentLocation = (e) => {
     e.preventDefault();
@@ -33,24 +43,54 @@ export const Reports = () => {
     }
     setForm((prev) => ({
       ...prev,
-      latitude: location.coordinates.lat.toString(),
-      longitude: location.coordinates.lng.toString(),
+      latitude: location.coordinates.lat,
+      longitude: location.coordinates.lng,
     }));
   };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response=await fetch(`${BACKEND_URL}/api/report`,{
-      method: "POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body: JSON.stringify(form)
-    })
-    if(!response.ok){
-    throw new Error("Failed to submit report");
+    setError("");
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/report`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          ...form,
+          latitude: typeof form.latitude === 'string' ? parseFloat(form.latitude) : form.latitude,
+          longitude: typeof form.longitude === 'string' ? parseFloat(form.longitude) : form.longitude
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.status === 429) {
+        setError("Rate limit exceeded. You have submitted too many reports. Please wait 15 minutes before trying again.");
+        return;
+      }
+      
+      if (response.status === 400) {
+        setError(`Validation error: ${data.errors?.fieldErrors ? Object.values(data.errors.fieldErrors).flat().join(", ") : "Invalid data"}`);
+        return;
+      }
+      
+      if (!response.ok) {
+        setError(data.message || "Failed to submit report");
+        return;
+      }
+      
+      setSubmitted(true);
+      setForm({
+        type: "",
+        description: "",
+        latitude: "",
+        longitude: "",
+      });
+    } catch (err) {
+      setError(err.message || "Network error. Please try again.");
     }
-    setSubmitted(true);
   };
 
   return (
@@ -66,14 +106,20 @@ export const Reports = () => {
         <form onSubmit={handleSubmit}>
           <label className="reports-label">
             Type
-            <input
+            <select
               className="reports-input"
               name="type"
               value={form.type}
               onChange={handleChange}
-              placeholder="e.g. Flood, Fire, Earthquake"
               required
-            />
+            >
+              <option value="">Select a disaster type</option>
+              <option value="flood">Flood</option>
+              <option value="fire">Fire</option>
+              <option value="earthquake">Earthquake</option>
+              <option value="cyclone">Cyclone</option>
+              <option value="landslide">Landslide</option>
+            </select>
           </label>
 
           <label className="reports-label">
@@ -125,13 +171,19 @@ export const Reports = () => {
           <button type="button" className="reports-submit" onClick={handleGetCurrentLocation}>
             Get My Current Location
           </button>
-        </form>
-
-        {submitted && (
-          <div className="reports-success">
-            Report input captured successfully.
+        {error && (
+          <div className="reports-error">
+            {error}
           </div>
         )}
+        
+      </form>
+
+      {submitted && (
+        <div className="reports-success">
+          Report input captured successfully.
+        </div>
+      )}
       </div>
       <Link to="/" className="reports-back-link">← Back to Alerts</Link>
     </div>
