@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useGeoLocation from "../hooks/useGeoLocation";
 import "./reports.css";
 const BACKEND_URL =  'http://localhost:5000';//import.meta.env.VITE_BACKEND_URL ||
 export const Reports = () => {
+  const navigate = useNavigate();
   const location = useGeoLocation();
   const [form, setForm] = useState({
     type: "",
@@ -67,7 +68,12 @@ export const Reports = () => {
       const data = await response.json();
       
       if (response.status === 429) {
-        setError("Rate limit exceeded. You have submitted too many reports. Please wait 15 minutes before trying again.");
+        navigate('/rate-limit');
+        return;
+      }
+      
+      if (response.status === 500) {
+        navigate('/error', { state: { message: data.message } });
         return;
       }
       

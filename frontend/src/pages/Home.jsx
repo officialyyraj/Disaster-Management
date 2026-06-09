@@ -1,26 +1,39 @@
 import React from 'react'
 import {useState,useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Home.css'
 import AlertCard from '../components/alertCards.jsx'
 import MapView from "../components/mapView.jsx"
 import useGeoLocation from '../hooks/useGeoLocation.js'
+import { EmptyState } from './EmptyState.jsx'
 
 const BACKEND_URL =  import.meta.env.VITE_BACKEND_URL ||'http://localhost:5000';
 export const Home = () => {
+  const navigate = useNavigate();
   const location=useGeoLocation();
   const [alerts, setalerts] = useState([])
   const [radius, setRadius] = useState(null)
+  const [loaded, setLoaded] = useState(false)
+  const [error, setError] = useState(null)
+  
   useEffect(()=>{
     const fetch_alerts=async ()=>{
-      const response= await fetch(`${BACKEND_URL}/api/alert`)
-      if(!response.ok)throw new Error("Server temporarily offline")
-      const data= await response.json()
-
-      setalerts(data)
+      try {
+        const response= await fetch(`${BACKEND_URL}/api/alert`)
+        if(!response.ok) {
+          setError("Server temporarily offline")
+          return
+        }
+        const data= await response.json()
+        setalerts(data || [])
+        setLoaded(true)
+      } catch (err) {
+        setError(err.message)
+        navigate('/error', { state: { message: 'Failed to fetch alerts' } })
+      }
     };
     fetch_alerts();
-  },[]);
+  },[navigate]);
 
   useEffect(()=>{
     if (radius === null || !location.loaded || location.error) return;
@@ -38,6 +51,14 @@ export const Home = () => {
 
   const handleNearbyClick = () => {
     setRadius(300);
+  }
+
+  if (loaded && alerts.length === 0) {
+    return <EmptyState />;
+  }
+
+  if (error) {
+    return null; // ErrorBoundary or navigation already handled
   }
 
   return (
