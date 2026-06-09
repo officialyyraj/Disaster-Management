@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useGeoLocation from "../hooks/useGeoLocation";
 import "./reports.css";
-const BACKEND_URL =  'http://localhost:5000';//import.meta.env.VITE_BACKEND_URL ||
+const BACKEND_URL =  import.meta.env.VITE_BACKEND_URL ||'http://localhost:5000';//
 export const Reports = () => {
   const navigate = useNavigate();
   const location = useGeoLocation();
