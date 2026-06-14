@@ -1,7 +1,7 @@
 const asyncHandler=require('express-async-handler')
 const pool=require('../../config/db.js')
 const { fetch_alerts_from_sachet_ndma, filter_data_from_fetch, fetch_nearby_alerts } = require('../../services/alert services/alert-services.js')
-const { reportSchema } = require('../../validations/report.validation.ts')
+const { reportSchema } = require('../../validations/report.validation.js')
 //@desc fetch all alerts from the url, and send it as a json
 //@route /api/alerts
 //@access public
